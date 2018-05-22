@@ -14,11 +14,12 @@
   revision = "3a771d992973f24aa725d07868b467d1ddfceafb"
 
 [[projects]]
-  branch = "master"
+  branch = "hum"
   name = "github.com/containers/image"
   packages = [
     "copy",
     "docker",
+    "docker/archive",
     "docker/policyconfiguration",
     "docker/reference",
     "docker/tarfile",
@@ -34,7 +35,8 @@
     "types",
     "version"
   ]
-  revision = "3143027065e31d25d8d2b6fe84b250a320fd9130"
+  revision = "465778bd0a7f969c6e6142f44839a33088e157e3"
+  source = "https://github.com/barpilot/image.git"
 
 [[projects]]
   branch = "master"
@@ -270,6 +272,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a918a5c630cec011d9d23061b86ce716345227cb9862e78c7b80106f612358fe"
+  inputs-digest = "70a85beddaba47380b1a53144f5b785085ccb985dc75c3b6894fb56037cee9d2"
   solver-name = "gps-cdcl"
   solver-version = 1

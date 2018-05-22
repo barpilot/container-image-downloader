@@ -1,6 +1,7 @@
 [[constraint]]
   name = "github.com/containers/image"
-  branch = "master"
+  branch = "hum"
+  source = "https://github.com/barpilot/image.git"
 
 # vendor/github.com/docker/go-metrics/timer.go:39:4: undefined: prometheus.Observer
 [[override]]
