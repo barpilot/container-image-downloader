@@ -80,7 +80,7 @@ func HandleClient(writer http.ResponseWriter, request *http.Request) {
 		SourceCtx:        nil, //s.systemContext,
 		DestinationCtx:   &types.SystemContext{},
 	}); err != nil {
-		http.Error(writer, "Fail to get source information, err", 400)
+		http.Error(writer, fmt.Sprint("Fail to get source information, err: %s", err.Error()), 400)
 		return
 	}
 
