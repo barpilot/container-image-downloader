@@ -1,6 +1,7 @@
 package main
 
 import (
+	"compress/gzip"
 	"fmt"
 	"net/http"
 	"os"
@@ -30,13 +31,13 @@ func HandleClient(writer http.ResponseWriter, request *http.Request) {
 	image := request.URL.Query().Get("image")
 	if image == "" {
 		//Get not set, send a 400 bad request
-		http.Error(writer, "Get 'image' not specified in url.", 400)
+		http.Error(writer, "Get 'image' not specified in url.", http.StatusPreconditionFailed)
 		return
 	}
 
 	ref, err := docker.ParseReference(image)
 	if err != nil {
-		http.Error(writer, "Fail to parse 'image'", 400)
+		http.Error(writer, "Fail to parse 'image'", http.StatusNotFound)
 		return
 	}
 
@@ -56,13 +57,17 @@ func HandleClient(writer http.ResponseWriter, request *http.Request) {
 		http.Error(writer, "Fail to get ref", 400)
 		return
 	}
-	dest, err := archive.NewImageDestinationWriter(nil, refTagged, writer)
+	gzw := gzip.NewWriter(writer)
+	defer gzw.Close()
+
+	dest, err := archive.NewImageDestinationWriter(nil, refTagged, gzw)
 	if err != nil {
 		http.Error(writer, "Fail NewImageDestinationWriter", 400)
 		return
 	}
+	defer dest.Close()
 
-	writer.Header().Set("Content-Disposition", "attachment; filename="+image+".tar")
+	writer.Header().Set("Content-Disposition", "attachment; filename=\""+image+".tgz\"")
 
 	policy := &signature.Policy{Default: []signature.PolicyRequirement{signature.NewPRInsecureAcceptAnything()}}
 
