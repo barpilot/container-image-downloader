@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path"
 
 	"github.com/containers/image/copy"
 	"github.com/containers/image/docker"
@@ -24,8 +25,6 @@ func main() {
 }
 
 func HandleClient(writer http.ResponseWriter, request *http.Request) {
-	//First of check if Get is set in the URL
-
 	ctx := request.Context()
 
 	image := request.URL.Query().Get("image")
@@ -41,7 +40,6 @@ func HandleClient(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	//img, err := ref.NewImage(ctx, nil)
 	srcimg, err := ref.NewImageSource(ctx, nil)
 	if err != nil {
 		http.Error(writer, "Fail to parse 'image'", 400)
@@ -50,13 +48,12 @@ func HandleClient(writer http.ResponseWriter, request *http.Request) {
 	defer srcimg.Close()
 	fmt.Println("Client requests: " + image)
 
-	//refdest := reference.NamedTagged{}
-	//refTagged, err := reference.WithTag(ref.DockerReference(), "latest")
 	refTagged, ok := ref.DockerReference().(reference.NamedTagged)
 	if !ok {
 		http.Error(writer, "Fail to get ref", 400)
 		return
 	}
+
 	gzw := gzip.NewWriter(writer)
 	defer gzw.Close()
 
@@ -67,7 +64,8 @@ func HandleClient(writer http.ResponseWriter, request *http.Request) {
 	}
 	defer dest.Close()
 
-	writer.Header().Set("Content-Disposition", "attachment; filename=\""+image+".tgz\"")
+	writer.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.tgz\"", path.Base(image)))
+	//writer.Header().Set("Content-Type", "application/tar+gzip")
 
 	policy := &signature.Policy{Default: []signature.PolicyRequirement{signature.NewPRInsecureAcceptAnything()}}
 
@@ -85,32 +83,9 @@ func HandleClient(writer http.ResponseWriter, request *http.Request) {
 		SourceCtx:        nil, //s.systemContext,
 		DestinationCtx:   &types.SystemContext{},
 	}); err != nil {
-		http.Error(writer, fmt.Sprint("Fail to get source information, err: %s", err.Error()), 400)
+		http.Error(writer, fmt.Sprintf("Fail to get source information, err: %s", err.Error()), 400)
 		return
 	}
 
-	//Send the headers
-	//writer.Header().Set("Content-Type", FileContentType)
-
-	// blobs := img.LayerInfos()
-	// img.ConfigInfo()
-	// if err != nil || len(blobs) == 0 {
-	// 	http.Error(writer, "Fail to get source information", 400)
-	// 	return
-	// }
-
-	// manifest, _, err := srcimg.GetManifest(ctx, nil)
-	// dest.PutManifest(ctx, manifest)
-	// for _, blob := range blobs {
-	// 	reader, _, err := srcimg.GetBlob(ctx, blob)
-	// 	if err != nil {
-	// 		http.Error(writer, "Fail to get source data", 400)
-	// 		return
-	// 	}
-	// 	defer reader.Close()
-	//
-	// 	//writer.Header().Set("Content-Length", size)
-	// 	dest.PutBlob(ctx, reader, blob, false)
-	// }
 	return
 }
