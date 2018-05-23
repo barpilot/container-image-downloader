@@ -16,7 +16,7 @@ import (
 func main() {
 	fmt.Println("Starting http file sever")
 	http.HandleFunc("/", HandleClient)
-	err := http.ListenAndServe(":80", nil)
+	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -62,6 +62,8 @@ func HandleClient(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	writer.Header().Set("Content-Disposition", "attachment; filename="+image+".tar")
+
 	policy := &signature.Policy{Default: []signature.PolicyRequirement{signature.NewPRInsecureAcceptAnything()}}
 
 	sctx, err := signature.NewPolicyContext(policy)
@@ -91,7 +93,6 @@ func HandleClient(writer http.ResponseWriter, request *http.Request) {
 	// 	http.Error(writer, "Fail to get source information", 400)
 	// 	return
 	// }
-	writer.Header().Set("Content-Disposition", "attachment; filename="+image+".tar")
 
 	// manifest, _, err := srcimg.GetManifest(ctx, nil)
 	// dest.PutManifest(ctx, manifest)
