@@ -65,7 +65,7 @@ func HandleClient(writer http.ResponseWriter, request *http.Request) {
 	defer dest.Close()
 
 	writer.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.tgz\"", path.Base(image)))
-	//writer.Header().Set("Content-Type", "application/tar+gzip")
+	writer.Header().Set("Content-Type", "application/gzip")
 
 	policy := &signature.Policy{Default: []signature.PolicyRequirement{signature.NewPRInsecureAcceptAnything()}}
 
